@@ -1,0 +1,26 @@
+/**
+ * Style for the DropMe plugin
+ *
+ * @author Johan Binard <johan.binard@gmail.com>
+ */
+ 
+ .link {
+	cursor: pointer;
+	font-weight: bold;
+	margin: 0;
+	padding: 0;
+ }
+ 
+ .link:hover {
+	text-decoration : underline;
+ }
+ 
+ #dokuwiki__aside .dropdown, #dokuwiki__aside .dropdown ul,  #dokuwiki__aside .dropdown ul li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+ }
+ 
+ .sublevel {
+	margin-left: 1em;
+ }
