@@ -64,16 +64,18 @@ class syntax_plugin_dropdown extends DokuWiki_Syntax_Plugin {
 	
 	// Define the opening tag corresponding to the syntax of the plugin
 	function connectTo($mode) {
-		$this->Lexer->addEntryPattern('<lvl1.*?>(?=.*?</lvl1>)', $mode, 'plugin_dropdown');
+		$this->Lexer->addEntryPattern('<dropdown.*?>(?=.*?</dropdown>)', $mode, 'plugin_dropdown');
 	}
 	
 	// Define the closing tag corresponding to the syntax of the plugin
 	function postConnect() {
+		$this->Lexer->addPattern('<lvl1.*?>', 'plugin_dropdown');
+		$this->Lexer->addPattern('</lvl1>', 'plugin_dropdown');
 		$this->Lexer->addPattern('<lvl2.*?>', 'plugin_dropdown');
 		$this->Lexer->addPattern('</lvl2>', 'plugin_dropdown');
 		$this->Lexer->addPattern('<lvl3.*?>', 'plugin_dropdown');
 		$this->Lexer->addPattern('</lvl3>', 'plugin_dropdown');
-		$this->Lexer->addExitPattern('</lvl1>', 'plugin_dropdown');
+		$this->Lexer->addExitPattern('</dropdown>', 'plugin_dropdown');
 	}
  
 	/**
@@ -82,16 +84,35 @@ class syntax_plugin_dropdown extends DokuWiki_Syntax_Plugin {
 	function handle($match, $state, $pos, & $handler) {
 		switch ($state) {
 			case DOKU_LEXER_ENTER:
-				preg_match('/\"(.*?)\"/', $match, $result);
-				$name = $result[1];
 				return array (
 					$state,
-					array (
-						$name
-					)
 				);
 				
 			case DOKU_LEXER_MATCHED:
+				// opening tag for lvl 1
+				if(substr($match, 0, 6) == '<lvl1 '){
+					preg_match('/\"(.*?)\"/', $match, $result);
+					$name = $result[1];
+					$type = 'opening_1';
+					return array (
+						$state,
+						array (
+							$name,
+							$type
+						)
+					);
+				}
+				//closing tag for lvl 1
+				if(substr($match, 0, 6) == '</lvl1'){
+					$type = 'closing_1';
+					return array (
+						$state,
+						array (
+							'',
+							$type
+						)
+					);
+				}
 				// opening tag for lvl 2
 				if(substr($match, 0, 6) == '<lvl2 '){
 					preg_match('/\"(.*?)\"/', $match, $result);
@@ -163,21 +184,31 @@ class syntax_plugin_dropdown extends DokuWiki_Syntax_Plugin {
 			list ($state, $match) = $data;
 			switch ($state) {
 				case DOKU_LEXER_ENTER:
-					// output for lvl 1 opening tag
+					// output for dropdown opening tag
 					list ($name) = $match;
-					$renderer->doc .= '<ul class="dropdown"><li class="link" onclick="showhide(\''. $name . '\');">' . $name . '</li><div id="' . $name . '" class="hidden sublevel">';
+					$renderer->doc .= '<div class="dropdown"><ul>';
 					break;
 					
 				case DOKU_LEXER_MATCHED:
 					list ($name, $type) = $match;
+					// output for lvl 1 opening tag
+					if ($type == 'opening_1') {
+						$renderer->doc .= '<ul><li class="link" onclick="showhide(\''. $name . '\');">' . $name . '</li><div id="' . $name . '" class="hidden sublevel">';
+						break;
+					}
 					// output for lvl 2 opening tag
 					if ($type == 'opening_2') {
-						$renderer->doc .= '<ul class="dropdown"><li class="link" onclick="showhide(\''. $name . '\');">' . $name . '</li><div id="' . $name . '" class="hidden sublevel">';
+						$renderer->doc .= '<ul><li class="link" onclick="showhide(\''. $name . '\');">' . $name . '</li><div id="' . $name . '" class="hidden sublevel">';
 						break;
 					}
 					// output for lvl 3 opening tag
 					if ($type == 'opening_3') {
-						$renderer->doc .= '<ul class="dropdown"><li class="link" onclick="showhide(\''. $name . '\');">' . $name . '</li><div id="' . $name . '" class="hidden sublevel">';
+						$renderer->doc .= '<ul><li class="link" onclick="showhide(\''. $name . '\');">' . $name . '</li><div id="' . $name . '" class="hidden sublevel">';
+						break;
+					}
+					// output for lvl 1 closing tag
+					if ($type == 'closing_1') {
+						$renderer->doc .= "</div></ul>";
 						break;
 					}
 					// output for lvl 2 closing tag
@@ -196,8 +227,8 @@ class syntax_plugin_dropdown extends DokuWiki_Syntax_Plugin {
 					break;
 					
 				case DOKU_LEXER_EXIT:
-					// output for lvl 1 closing tag
-					$renderer->doc .= "</div></ul>";
+					// output for dropdown closing tag
+					$renderer->doc .= "</ul></div>";
 					break;
 			}
 			return true;

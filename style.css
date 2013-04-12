@@ -15,7 +15,7 @@
 	text-decoration : underline;
  }
  
- #dokuwiki__aside .dropdown, #dokuwiki__aside .dropdown ul,  #dokuwiki__aside .dropdown ul li {
+ #dokuwiki__aside .dropdown, #dokuwiki__aside .dropdown p, #dokuwiki__aside .dropdown ul,  #dokuwiki__aside .dropdown ul li, .dropdown, .dropdown p, .dropdown ul, .dropdown ul li {
 	margin: 0;
 	padding: 0;
 	list-style: none;
